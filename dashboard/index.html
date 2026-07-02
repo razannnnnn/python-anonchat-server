@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnonChat Admin Dashboard</title>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Login Overlay -->
+    <div id="loginOverlay" class="overlay active">
+        <div class="login-card glass-panel">
+            <div class="logo">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <h2>Admin Login</h2>
+            <p>AnonChat Server Dashboard</p>
+            <form id="loginForm">
+                <div class="input-group">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="passwordInput" placeholder="Enter Admin Password" required autocomplete="off">
+                </div>
+                <div id="loginError" class="error-msg"></div>
+                <button type="submit" class="btn-primary">Access Dashboard <i class="fa-solid fa-arrow-right"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboardApp" class="dashboard-layout hidden">
+        
+        <!-- Sidebar -->
+        <aside class="sidebar glass-panel">
+            <div class="sidebar-header">
+                <div class="logo-small">
+                    <i class="fa-solid fa-server"></i>
+                </div>
+                <h3>AnonChat<span>Admin</span></h3>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-tab="overview">
+                    <i class="fa-solid fa-chart-pie"></i> Overview
+                </a>
+                <a href="#" class="nav-item" data-tab="users">
+                    <i class="fa-solid fa-users"></i> Online Users
+                </a>
+                <a href="#" class="nav-item" data-tab="rooms">
+                    <i class="fa-solid fa-comments"></i> Active Rooms
+                </a>
+                <a href="#" class="nav-item" data-tab="actions">
+                    <i class="fa-solid fa-bolt"></i> Broadcast
+                </a>
+                <a href="#" class="nav-item" data-tab="console">
+                    <i class="fa-solid fa-terminal"></i> Console
+                </a>
+                <a href="#" class="nav-item" data-tab="bans">
+                    <i class="fa-solid fa-ban"></i> Ban List
+                </a>
+                <a href="#" class="nav-item" data-tab="settings">
+                    <i class="fa-solid fa-gear"></i> Settings
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="btn-outline">
+                    <i class="fa-solid fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="topbar glass-panel">
+                <div class="topbar-title">
+                    <h2 id="currentTabTitle">Overview</h2>
+                </div>
+                <div class="topbar-status">
+                    <div class="status-indicator">
+                        <span class="pulse-dot"></span>
+                        <span id="serverUptime">Uptime: 00:00:00</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                
+                <!-- OVERVIEW TAB -->
+                <div id="tab-overview" class="tab-content active">
+                    
+                    <!-- Metrics Cards -->
+                    <div class="metrics-grid">
+                        <div class="metric-card glass-panel">
+                            <div class="metric-icon blue"><i class="fa-solid fa-microchip"></i></div>
+                            <div class="metric-info">
+                                <span class="metric-label">CPU Usage</span>
+                                <h3 id="cpuMetric" class="metric-value">0%</h3>
+                                <div class="progress-bar"><div id="cpuBar" class="progress-fill blue"></div></div>
+                            </div>
+                        </div>
+                        
+                        <div class="metric-card glass-panel">
+                            <div class="metric-icon purple"><i class="fa-solid fa-memory"></i></div>
+                            <div class="metric-info">
+                                <span class="metric-label">RAM Usage</span>
+                                <h3 id="ramMetric" class="metric-value">0 MB</h3>
+                                <div class="progress-bar"><div id="ramBar" class="progress-fill purple"></div></div>
+                            </div>
+                        </div>
+                        
+                        <div class="metric-card glass-panel">
+                            <div class="metric-icon green"><i class="fa-solid fa-users"></i></div>
+                            <div class="metric-info">
+                                <span class="metric-label">Users Online</span>
+                                <h3 id="usersMetric" class="metric-value">0</h3>
+                                <span class="metric-sub">Across all rooms</span>
+                            </div>
+                        </div>
+                        
+                        <div class="metric-card glass-panel">
+                            <div class="metric-icon orange"><i class="fa-solid fa-layer-group"></i></div>
+                            <div class="metric-info">
+                                <span class="metric-label">Active Rooms</span>
+                                <h3 id="roomsMetric" class="metric-value">0</h3>
+                                <span class="metric-sub">Including global</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chart Section -->
+                    <div class="chart-container">
+                        <canvas id="metricsChart" height="80"></canvas>
+                    </div>
+
+                </div>
+
+                <!-- USERS TAB -->
+                <div id="tab-users" class="tab-content hidden">
+                    <div class="panel glass-panel">
+                        <div class="panel-header">
+                            <h3>Connected Users</h3>
+                            <div class="panel-actions">
+                                <span class="badge" id="totalUsersBadge">0 Users</span>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Username</th>
+                                        <th>Room</th>
+                                        <th>IP Address</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usersTableBody">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ROOMS TAB -->
+                <div id="tab-rooms" class="tab-content hidden">
+                    <div class="panel glass-panel">
+                        <div class="panel-header">
+                            <h3>Active Chat Rooms</h3>
+                            <div class="panel-actions">
+                                <span class="badge" id="totalRoomsBadge">0 Rooms</span>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Room Name</th>
+                                        <th>Owner</th>
+                                        <th>Status</th>
+                                        <th>Online</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="roomsTableBody">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ACTIONS TAB -->
+                <div id="tab-actions" class="tab-content hidden">
+                    <div class="panel glass-panel">
+                        <div class="panel-header">
+                            <h3>Global Server Broadcast</h3>
+                        </div>
+                        <div class="panel-body">
+                            <p class="text-muted">Kirim pesan sistem ke semua user di seluruh room. Pesan akan muncul sebagai [ADMIN].</p>
+                            <form id="broadcastForm" class="action-form">
+                                <textarea id="broadcastMessage" rows="4" placeholder="Ketik pesan broadcast di sini..." required></textarea>
+                                <button type="submit" class="btn-primary w-100">
+                                    <i class="fa-solid fa-bullhorn"></i> Send Global Broadcast
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONSOLE TAB -->
+                <div id="tab-console" class="tab-content hidden">
+                    <div class="panel glass-panel">
+                        <div class="panel-header">
+                            <h3>Live Server Console</h3>
+                        </div>
+                        <div class="panel-body console-body">
+                            <pre id="consoleOutput" class="console-output"></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BANS TAB -->
+                <div id="tab-bans" class="tab-content hidden">
+                    <div class="panel glass-panel">
+                        <div class="panel-header">
+                            <h3>Global Ban List</h3>
+                        </div>
+                        <div class="panel-body">
+                            <form id="banForm" class="action-form">
+                                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                                    <select id="banType" style="padding: 10px; background: var(--nord0); color: var(--nord4); border: 1px solid var(--nord2); border-radius: 6px;">
+                                        <option value="ip">Ban IP</option>
+                                        <option value="username">Ban Username</option>
+                                    </select>
+                                    <input type="text" id="banTarget" placeholder="IP Address atau Username..." required style="flex-grow: 1;">
+                                    <button type="submit" class="btn-danger"><i class="fa-solid fa-gavel"></i> Ban</button>
+                                </div>
+                            </form>
+                            
+                            <h4 style="margin-bottom: 10px;">Banned IPs</h4>
+                            <ul id="bannedIpsList" style="list-style: none; padding: 0; margin-bottom: 20px;"></ul>
+                            
+                            <h4 style="margin-bottom: 10px;">Banned Usernames</h4>
+                            <ul id="bannedUsernamesList" style="list-style: none; padding: 0;"></ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SETTINGS TAB -->
+                <div id="tab-settings" class="tab-content hidden">
+                    <div class="panel glass-panel">
+                        <div class="panel-header">
+                            <h3>Server Settings</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="settings-item">
+                                <div>
+                                    <h4>Maintenance Mode</h4>
+                                    <p class="text-muted">Mencegah user baru untuk bergabung ke server.</p>
+                                </div>
+                                <button id="btnMaintenance" class="btn-outline">Toggle Maintenance</button>
+                            </div>
+                            <hr style="border: 0; border-top: 1px solid var(--nord2); margin: 20px 0;">
+                            <div class="settings-item">
+                                <div>
+                                    <h4>Clear Global History</h4>
+                                    <p class="text-muted">Menghapus riwayat chat global secara instan.</p>
+                                </div>
+                                <button id="btnClearHistory" class="btn-danger"><i class="fa-solid fa-trash"></i> Clear History</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast">
+        <div class="toast-icon"><i class="fa-solid fa-check-circle"></i></div>
+        <div class="toast-message" id="toastMessage">Action successful!</div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
